@@ -1,38 +1,57 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:get/get.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ServicesThongBao {
-  final _supabase = Supabase.instance.client;
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  // Hàm gửi Push Notification nổ đơn cho hệ sinh thái Thợ
+  Future<void> guiThongBaoDonMoiChoTho({
+    required String idDonHang,
+    required String tieuDeSuCo,
+    required String loaiDichVu,
+    required bool laDonKhanCapSos,
+  }) async {
+    try {
+      // Tạm thời ở MVP, ta dùng Legacy API của Firebase để test cho nhanh.
+      // Cần lấy Server Key trong cài đặt của project Firebase: vieclam24h-da70e
+      const String khoaMayChuFirebase = 'ĐIỀN_SERVER_KEY_CỦA_FIREBASE_VÀO_ĐÂY';
+      const String duongDanApi = 'https://fcm.googleapis.com/fcm/send';
 
-  // Hàm khởi tạo và lưu token lên cơ sở dữ liệu
-  Future<void> khoiTaoVaLuuToken(String idNguoiDung) async {
-    // 1. Xin quyền hiển thị thông báo
-    await _fcm.requestPermission();
+      // Định tuyến: Nếu là đơn SOS, bắn cho toàn bộ thợ. Nếu không, bắn theo loại dịch vụ.
+      String chuDeNhan = laDonKhanCapSos
+          ? "/topics/tho_san_sang_sos"
+          : "/topics/tho_$loaiDichVu";
 
-    // 2. Lấy "địa chỉ" nhận thông báo của điện thoại này
-    String? fcmToken = await _fcm.getToken();
+      final Map<String, dynamic> duLieuThongBao = {
+        "to": chuDeNhan,
+        "notification": {
+          "title": laDonKhanCapSos
+              ? "🚨 CÓ ĐƠN SOS KHẨN CẤP!"
+              : "⚡ CÓ ĐƠN $loaiDichVu MỚI!",
+          "body": "Sự cố: $tieuDeSuCo. Chạm để nhận đơn ngay!",
+          "sound": "default", // Chuông báo mặc định
+        },
+        "data": {
+          "click_action": "FLUTTER_NOTIFICATION_CLICK",
+          "idDonHang": idDonHang,
+          "loaiThongBao": laDonKhanCapSos ? "DON_SOS" : "DON_THUONG",
+        },
+      };
 
-    if (fcmToken != null) {
-      // 3. Cập nhật fcmToken vào bảng nguoiDung trên Supabase
-      await _supabase
-          .from('nguoiDung')
-          .update({'fcmToken': fcmToken})
-          .eq('id', idNguoiDung);
+      final phanHoi = await http.post(
+        Uri.parse(duongDanApi),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'key=$khoaMayChuFirebase',
+        },
+        body: jsonEncode(duLieuThongBao),
+      );
 
-      print('Đã lưu fcmToken thành công: $fcmToken');
-    }
-
-    // 4. Lắng nghe thông báo khi app đang mở (hiện tạm Snackbar qua GetX để test)
-    FirebaseMessaging.onMessage.listen((RemoteMessage tinNhan) {
-      if (tinNhan.notification != null) {
-        Get.snackbar(
-          tinNhan.notification!.title ?? 'Có thông báo',
-          tinNhan.notification!.body ?? '',
-          snackPosition: SnackPosition.TOP,
-        );
+      if (phanHoi.statusCode == 200) {
+        print('Đã bắn lệnh Push Notification thành công lên Firebase!');
+      } else {
+        print('Lỗi Firebase: ${phanHoi.body}');
       }
-    });
+    } catch (loiNgoaiLe) {
+      print('Lỗi ngoại lệ khi gửi Push: $loiNgoaiLe');
+    }
   }
 }
