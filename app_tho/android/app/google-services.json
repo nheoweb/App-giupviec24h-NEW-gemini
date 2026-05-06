@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:919065241:android:e80ced08de72a8d5945e08",
+        "mobilesdk_app_id": "1:919065241:android:edf3de9b7b38a081945e08",
         "android_client_info": {
-          "package_name": "com.goithonhanh.khachhang.app_khach_hang"
+          "package_name": "com.goithonhanh.appkhach"
         }
       },
       "oauth_client": [],
@@ -26,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:919065241:android:b54edcda286f751c945e08",
+        "mobilesdk_app_id": "1:919065241:android:aa1d61e42da47c89945e08",
         "android_client_info": {
-          "package_name": "com.goithonhanh.tho.app_tho"
+          "package_name": "com.goithonhanh.apptho"
         }
       },
       "oauth_client": [],

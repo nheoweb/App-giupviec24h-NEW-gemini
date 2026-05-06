@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.u_testapp"
+    namespace = "com.goithonhanh.appkhach"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
