@@ -1,4 +1,4 @@
-package com.goithonhanh.appkhach
+package com.goithonhanh.apptho
 
 import io.flutter.embedding.android.FlutterActivity
 
