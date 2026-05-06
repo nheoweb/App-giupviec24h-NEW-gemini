@@ -24,6 +24,27 @@ class DonHangController extends GetxController {
     loaiDichVuDuocChon.value = dichVu;
   }
 
+  // === BỔ SUNG LƯU TRỮ TRẠNG THÁI VIDEO ===
+  var duongDanVideo = ''.obs;
+
+  Future<void> quayVideoBatBenh() async {
+    // Code giả lập tạm thời khi chưa cài image_picker:
+    duongDanVideo.value = 'da_co_video_demo.mp4';
+
+    Get.snackbar(
+      'Thành công',
+      'Đã ghi hình tình trạng hỏng hóc',
+      backgroundColor: mauChuDao,
+      colorText: mauNen,
+      margin: const EdgeInsets.all(16),
+    );
+  }
+
+  // Hàm tiện ích để khách hàng có thể hủy video nếu quay sai
+  void xoaVideoBatBenh() {
+    duongDanVideo.value = '';
+  }
+
   // --- LUỒNG ĐẶT THỢ TIÊU CHUẨN ---
   Future<void> xacNhanTimTho() async {
     String dichVu = loaiDichVuDuocChon.value;
@@ -34,8 +55,7 @@ class DonHangController extends GetxController {
       Get.snackbar(
         'Thiếu thông tin',
         'Quý khách vui lòng nhập địa chỉ để thợ có thể đến hỗ trợ nhé!',
-        backgroundColor:
-            mauNhan, // Đã sửa theo đúng tên biến trong theme_mau_sac.dart
+        backgroundColor: mauNhan, // Màu cam nhấn cảnh báo nhẹ
         colorText: mauNen,
         snackPosition: SnackPosition.TOP,
         margin: const EdgeInsets.all(16),
@@ -45,20 +65,26 @@ class DonHangController extends GetxController {
 
     dangTaiDuLieu.value = true;
 
+    // ĐÃ SỬA: Truyền thêm videoBatBenh vào Services
     bool ketQua = await ServicesDonHang.taoDonHangMoi(
       loaiDichVu: dichVu,
       moTa: moTa,
       diaChi: diaChi,
       isSOS: false,
+      videoBatBenh: duongDanVideo.value.isNotEmpty ? duongDanVideo.value : null,
     );
 
     dangTaiDuLieu.value = false;
 
     if (ketQua) {
+      // Reset lại form sau khi đặt thành công
+      moTaController.clear();
+      xoaVideoBatBenh();
+
       Get.snackbar(
         'Thành công!',
         'Đã gửi yêu cầu, hệ thống đang tìm thợ gần bạn nhất...',
-        backgroundColor: mauChuDao,
+        backgroundColor: mauChuDao, // Màu xanh lá uy tín
         colorText: mauNen,
         margin: const EdgeInsets.all(16),
       );
@@ -73,7 +99,7 @@ class DonHangController extends GetxController {
     }
   }
 
-  // === BỔ SUNG: LUỒNG CẤP CỨU SOS ===
+  // === LUỒNG CẤP CỨU SOS ===
   Future<void> xacNhanTimThoSos() async {
     String diaChi = diaChiController.text.trim();
 
@@ -81,7 +107,7 @@ class DonHangController extends GetxController {
       Get.snackbar(
         'Khẩn cấp nhưng thiếu địa chỉ!',
         'Vui lòng nhập địa chỉ để thợ SOS phi đến ngay nhé!',
-        backgroundColor: mauLoi,
+        backgroundColor: mauLoi, // Đỏ khẩn cấp
         colorText: mauNen,
         snackPosition: SnackPosition.TOP,
         margin: const EdgeInsets.all(16),
@@ -91,42 +117,33 @@ class DonHangController extends GetxController {
 
     dangTaiDuLieu.value = true;
 
-    // Gửi lên Supabase, chú ý cờ isSOS = true sẽ map với cột 'sos' trong bảng don_hang
+    // ĐÃ SỬA: Truyền thêm videoBatBenh vào Services
     bool ketQua = await ServicesDonHang.taoDonHangMoi(
-      loaiDichVu: 'Cấp cứu SOS', // Không cần khách chọn, gán cứng luôn
+      loaiDichVu: 'Cấp cứu SOS',
       moTa: moTaController.text.trim(),
       diaChi: diaChi,
       isSOS: true,
+      videoBatBenh: duongDanVideo.value.isNotEmpty ? duongDanVideo.value : null,
     );
 
     dangTaiDuLieu.value = false;
 
     if (ketQua) {
+      moTaController.clear();
+      xoaVideoBatBenh();
+
       Get.snackbar(
         'Đã phát tín hiệu SOS!',
         'Thợ cứu hộ đang trên đường tới trong vòng 30 phút.',
-        backgroundColor: mauNhan,
+        backgroundColor: mauNhan, // Màu cam SOS
         colorText: mauNen,
         margin: const EdgeInsets.all(16),
+        duration: const Duration(
+          seconds: 4,
+        ), // Hiển thị lâu hơn chút cho khách an tâm
       );
       // TODO: Điều hướng sang màn hình Radar Đỏ
     }
-  }
-
-  // === BỔ SUNG: LUỒNG QUAY VIDEO BẮT BỆNH ===
-  var duongDanVideo = ''.obs; // Lưu đường dẫn file video tạm
-
-  Future<void> quayVideoBatBenh() async {
-    // Code giả lập tạm thời khi chưa cài image_picker:
-    duongDanVideo.value = 'da_co_video_demo.mp4';
-
-    Get.snackbar(
-      'Thành công',
-      'Đã ghi hình tình trạng hỏng hóc',
-      backgroundColor: mauChuDao,
-      colorText: mauNen,
-      margin: const EdgeInsets.all(16),
-    );
   }
 
   @override
