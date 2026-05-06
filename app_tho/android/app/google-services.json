@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:919065241:android:e80ced08de72a8d5945e08",
+        "android_client_info": {
+          "package_name": "com.goithonhanh.khachhang.app_khach_hang"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzpfKjPw2OyR9RXo0T3AmBUh8NveEPwVs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:919065241:android:b54edcda286f751c945e08",
         "android_client_info": {
           "package_name": "com.goithonhanh.tho.app_tho"
